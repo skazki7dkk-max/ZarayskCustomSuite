@@ -10,7 +10,9 @@ $game = Join-Path $Cs2 'game/csgo_addons/zaraysk_menu'
 New-Item -ItemType Directory -Force $content,$game | Out-Null
 Copy-Item "$root/panorama" $content -Recurse -Force
 foreach ($file in @('panorama/styles/custom_game/zaraysk_menu.css','panorama/layout/custom_game/zaraysk_menu.xml')) {
-  & $compiler -i "$content/$file" -r -nop4
+  # Files copied from an archive can keep timestamps older than stale compiled
+  # output. Force compilation so a changed HUD can never silently remain old.
+  & $compiler -i "$content/$file" -r -nop4 -f
   if ($LASTEXITCODE) { throw "Compilation failed: $file" }
 }
 foreach ($file in @('panorama/styles/custom_game/zaraysk_menu.vcss_c','panorama/layout/custom_game/zaraysk_menu.vxml_c')) {

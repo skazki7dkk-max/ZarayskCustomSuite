@@ -133,6 +133,7 @@
   ],
   "PriorityEnabled": true,
   "SuppressOtherHudInput": true,
+  "OpenSound": "sounds/ui/panorama/itemtile_click_02.vsnd",
   "MoveSound": "sounds/ui/panorama/itemtile_plastic_rollover_15.vsnd",
   "SelectSound": "sounds/ui/panorama/itemtile_click_02.vsnd",
   "BackSound": "sounds/ui/panorama/inventory_item_close_01.vsnd",

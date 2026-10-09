@@ -6,9 +6,11 @@ using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities;
+using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Menu;
 using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 using ZarayskMenu.Api;
 using ZarayskMenu.Api.Compatibility.Enum;
 using ZarayskBaseMenu = ZarayskMenu.Api.Compatibility.Class.BaseMenu;
@@ -19,7 +21,7 @@ namespace ZarayskCosmetics;
 public sealed class ZarayskCosmeticsPlugin : BasePlugin, IPluginConfig<CosmeticsConfig>
 {
     public override string ModuleName => "Zaraysk Cosmetics";
-    public override string ModuleVersion => "1.3.0";
+    public override string ModuleVersion => "1.3.1";
     public override string ModuleAuthor => "Zaraysk";
     public override string ModuleDescription => "Timed Workshop model inventory for ZarayskMenu";
 
@@ -29,7 +31,7 @@ public sealed class ZarayskCosmeticsPlugin : BasePlugin, IPluginConfig<Cosmetics
     private readonly ConcurrentDictionary<ulong, List<CosmeticGrant>> inventory = new();
     private readonly Dictionary<(ulong SteamId, string Slot), CBaseEntity> spawned = [];
     private readonly Dictionary<(ulong SteamId, string Slot), Vector> petPositions = [];
-    private sealed record AppliedWeapon(CBasePlayerWeapon Weapon, string CosmeticId, string OriginalModel);
+    private sealed record AppliedWeapon(CBasePlayerWeapon Weapon, CBaseModelEntity? ViewModel, string CosmeticId, string OriginalWorldModel, string OriginalViewModel);
     private readonly Dictionary<ulong, AppliedWeapon> appliedWeapons = [];
     private readonly Dictionary<ulong, Dictionary<string, string>> vipEquipped = [];
     private readonly HashSet<int> localTestSlots = [];
@@ -290,13 +292,25 @@ public sealed class ZarayskCosmeticsPlugin : BasePlugin, IPluginConfig<Cosmetics
         var grant = items.FirstOrDefault(item => item.Equipped && item.Quantity > 0 && (item.ExpiresAt is null || item.ExpiresAt > DateTime.UtcNow) && Config.Models.TryGetValue(item.CosmeticId, out var value)
             && value.Type == "weapon" && (value.Team == 0 || value.Team == player.TeamNum) && WeaponMatches(value.WeaponClass, weapon.DesignerName));
         if (grant is null || !Config.Models.TryGetValue(grant.CosmeticId, out var definition)) { RestoreWeapon(player.SteamID); return; }
-        if (appliedWeapons.TryGetValue(player.SteamID, out var applied) && applied.Weapon.IsValid && applied.Weapon.Handle == weapon.Handle && applied.CosmeticId == grant.CosmeticId) return;
+        if (appliedWeapons.TryGetValue(player.SteamID, out var applied) && applied.Weapon.IsValid && applied.Weapon.Handle == weapon.Handle && applied.CosmeticId == grant.CosmeticId)
+        {
+            // CS2 recreates/resets the first-person entity on weapon switches. Reassert it
+            // without rebuilding the tracked world-model state.
+            var currentViewModel = TryGetViewModel(player);
+            var currentViewModelName = currentViewModel?.CBodyComponent?.SceneNode?.GetSkeletonInstance().ModelState.ModelName;
+            if (currentViewModel is { IsValid: true } && currentViewModelName != definition.ModelPath)
+                currentViewModel.SetModel(definition.ModelPath);
+            return;
+        }
         RestoreWeapon(player.SteamID);
         var original = weapon.CBodyComponent?.SceneNode?.GetSkeletonInstance().ModelState.ModelName ?? "";
+        var viewModel = TryGetViewModel(player);
+        var originalViewModel = viewModel?.CBodyComponent?.SceneNode?.GetSkeletonInstance().ModelState.ModelName ?? "";
         weapon.SetModel(definition.ModelPath);
-        appliedWeapons[player.SteamID] = new(weapon, grant.CosmeticId, original);
-        Logger.LogInformation("Applied custom weapon {CosmeticId} ({ModelPath}) to {SteamId}; entity={Entity}; original={OriginalModel}",
-            grant.CosmeticId, definition.ModelPath, player.SteamID, weapon.Index, original);
+        if (viewModel is { IsValid: true }) viewModel.SetModel(definition.ModelPath);
+        appliedWeapons[player.SteamID] = new(weapon, viewModel, grant.CosmeticId, original, originalViewModel);
+        Logger.LogInformation("Applied custom weapon {CosmeticId} ({ModelPath}) to {SteamId}; entity={Entity}; worldOriginal={OriginalModel}; viewOriginal={OriginalViewModel}",
+            grant.CosmeticId, definition.ModelPath, player.SteamID, weapon.Index, original, originalViewModel);
         CaptureLocalTestScreenshot(player, "zaraysk_custom_weapon", 1f);
     }
 
@@ -321,10 +335,27 @@ public sealed class ZarayskCosmeticsPlugin : BasePlugin, IPluginConfig<Cosmetics
             originZ + up);
     }
 
+    private static CBaseModelEntity? TryGetViewModel(CCSPlayerController player)
+    {
+        try
+        {
+            var pawn = player.PlayerPawn.Value;
+            if (pawn is not { IsValid: true }) return null;
+            var services = Marshal.ReadIntPtr(pawn.Handle + Schema.GetSchemaOffset("CBasePlayerPawn", "m_pViewModelServices"));
+            if (services == IntPtr.Zero) return null;
+            var field = services + Schema.GetSchemaOffset("CCSPlayer_ViewModelServices", "m_hViewModel");
+            return new CHandle<CBaseModelEntity>(field).Value;
+        }
+        catch { return null; }
+    }
+
     private void RestoreWeapon(ulong steamId)
     {
-        if (appliedWeapons.Remove(steamId, out var applied) && applied.Weapon.IsValid && !string.IsNullOrWhiteSpace(applied.OriginalModel))
-            applied.Weapon.SetModel(applied.OriginalModel);
+        if (!appliedWeapons.Remove(steamId, out var applied)) return;
+        if (applied.Weapon.IsValid && !string.IsNullOrWhiteSpace(applied.OriginalWorldModel))
+            applied.Weapon.SetModel(applied.OriginalWorldModel);
+        if (applied.ViewModel is { IsValid: true } && !string.IsNullOrWhiteSpace(applied.OriginalViewModel))
+            applied.ViewModel.SetModel(applied.OriginalViewModel);
     }
 
     private void Cleanup(ulong steamId)

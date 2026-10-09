@@ -20,7 +20,7 @@ namespace ZarayskVipSystem;
 public sealed class ZarayskVipSystemPlugin : BasePlugin, IPluginConfig<VipConfig>
 {
     public override string ModuleName => "Zaraysk VIP System";
-    public override string ModuleVersion => "2.3.0";
+    public override string ModuleVersion => "2.3.1";
     public override string ModuleAuthor => "Zaraysk";
     public override string ModuleDescription => "Standalone VIP system for CounterStrikeSharp and ZarayskMenu";
 
@@ -49,7 +49,6 @@ public sealed class ZarayskVipSystemPlugin : BasePlugin, IPluginConfig<VipConfig
         public uint VictimIndex;
         public float LastHit;
         public int LastDamage;
-        public float NextDraw;
     }
 
     public void OnConfigParsed(VipConfig config)
@@ -212,8 +211,7 @@ public sealed class ZarayskVipSystemPlugin : BasePlugin, IPluginConfig<VipConfig
         state.Total = AccumulateDamage(state.Total, state.LastHit, Server.CurrentTime, Config.Settings.DamageHudSeconds, amount);
         state.VictimIndex = victimIndex;
         state.LastHit = Server.CurrentTime;
-        DrawDamageHud(attacker, state.Total, state.LastDamage);
-        state.NextDraw = Server.CurrentTime + 0.15f;
+        DrawDamageHud(attacker, state.Total, state.LastDamage, Config.Settings.DamageHudSeconds);
     }
 
     public static int AccumulateDamage(int currentTotal, float previousHitTime, float now, float configuredSeconds, int amount)
@@ -325,9 +323,6 @@ public sealed class ZarayskVipSystemPlugin : BasePlugin, IPluginConfig<VipConfig
             var player = FindPlayer(pair.Key);
             if (Server.CurrentTime - pair.Value.LastHit > Math.Clamp(Config.Settings.DamageHudSeconds, 2f, 4f) || player is null)
             { damageHud.Remove(pair.Key); continue; }
-            if (Server.CurrentTime < pair.Value.NextDraw) continue;
-            pair.Value.NextDraw = Server.CurrentTime + 0.15f;
-            DrawDamageHud(player, pair.Value.Total, pair.Value.LastDamage);
         }
     }
 
@@ -554,11 +549,12 @@ public sealed class ZarayskVipSystemPlugin : BasePlugin, IPluginConfig<VipConfig
         attacker.PrintToChat($" {ChatColors.Gold}{attacker.PlayerName} {ChatColors.White}{death.Weapon} {ChatColors.LightBlue}{victim?.PlayerName ?? "enemy"} {ChatColors.Red}[{extras}]");
     }
 
-    private static void DrawDamageHud(CCSPlayerController attacker, int damage, int lastDamage)
+    private static void DrawDamageHud(CCSPlayerController attacker, int damage, int lastDamage, float configuredSeconds)
     {
         var color = damage >= 100 ? "#ff4040" : damage >= 50 ? "#ffb020" : "#ffffff";
-        // Small stock HUD text; refresh while the burst is active, without oversized blank lines.
-        attacker.PrintToCenterHtml($"<font color='{color}' class='fontSize-s'><b>{damage}</b></font> <font color='#aeb7c8' class='fontSize-s'>урона · +{lastDamage}</font>", 1);
+        // One draw per hit avoids the visible blink caused by replacing CenterHtml every 150 ms.
+        var duration = (int)Math.Ceiling(Math.Clamp(configuredSeconds, 2f, 4f));
+        attacker.PrintToCenterHtml($"<font color='{color}' class='fontSize-s'><b>{damage}</b></font> <font color='#aeb7c8' class='fontSize-s'>урона · +{lastDamage}</font>", duration);
     }
 
     private void OnEntityCreated(CEntityInstance entity)

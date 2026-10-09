@@ -19,6 +19,7 @@ public sealed class Settings
     public bool RebuildOnConnect { get; set; } = true;
     public bool PriorityEnabled { get; set; } = true;
     public bool SuppressOtherHudInput { get; set; } = true;
+    public string OpenSound { get; set; } = "sounds/ui/panorama/itemtile_click_02.vsnd";
     public string MoveSound { get; set; } = "sounds/ui/panorama/itemtile_plastic_rollover_15.vsnd";
     public string SelectSound { get; set; } = "sounds/ui/panorama/itemtile_click_02.vsnd";
     public string BackSound { get; set; } = "sounds/ui/panorama/inventory_item_close_01.vsnd";
@@ -58,7 +59,8 @@ public sealed class Settings
             throw new InvalidDataException("Invalid title/theme/placement");
         if (PageSize is < 1 or > 7 || TimeoutSeconds is < 5 or > 600 || ClickCooldownMs is < 100 or > 2000
             || ExitHoldSeconds is < 0.5 or > 10.0 || SoundVolume is < 0 or > 1
-            || new[] { MoveSound, SelectSound, BackSound, ExitSound }.Any(sound => sound.Length > 160 || sound.Contains('\n') || sound.Contains('\r')))
+            || new[] { OpenSound, MoveSound, SelectSound, BackSound, ExitSound }.Any(sound => sound.Length > 160 || sound.Contains('\n') || sound.Contains('\r')
+                || sound.Length > 0 && !Regex.IsMatch(sound, @"\A(?:sounds/[a-zA-Z0-9_./-]+\.vsnd|[a-zA-Z][a-zA-Z0-9_.-]*)\z")))
             throw new InvalidDataException("Invalid page size, timeout or cooldown");
         foreach (var requirement in RequiredPlugins)
         {

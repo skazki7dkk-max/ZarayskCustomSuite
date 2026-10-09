@@ -17,7 +17,7 @@ namespace ZarayskMenu;
 public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuService
 {
     public override string ModuleName => "ZarayskMenu";
-    public override string ModuleVersion => "0.7.2";
+    public override string ModuleVersion => "0.7.3";
     public override string ModuleAuthor => "Zaraysk";
     public override string ModuleDescription => "Panorama menu and C#/Metamod command integration";
     const string Layout = "panorama/layout/custom_game/zaraysk_menu.vxml_c";
@@ -213,6 +213,7 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
             ready = true; EnsureHud();
             var session = new Session(menuId) { MouseMode = mousePreferences.GetValueOrDefault(p.Slot) }; sessions[p.Slot] = session;
             Draw(p);
+            PlayMenuSound(p, settings.OpenSound);
             // The client may not have constructed the replicated panel on the first frame.
             // Bound retries never reopen a closed/replaced session or extend its timeout.
             foreach (var delay in new[] { 0.15f, 0.5f, 1.5f })
@@ -409,9 +410,15 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
     void PlayMenuSound(CCSPlayerController p, string sound)
     {
         if (settings.SoundVolume <= 0 || string.IsNullOrWhiteSpace(sound)) return;
-        var pawn = p.PlayerPawn.Value;
-        if (pawn is not { IsValid: true }) return;
-        try { pawn.EmitSound(sound, p, settings.SoundVolume, 1f); }
+        try
+        {
+            // UI files are raw .vsnd resources rather than sound-event names.
+            // playvol is client-local, so only the player using the menu hears it.
+            if (sound.StartsWith("sounds/", StringComparison.OrdinalIgnoreCase))
+                p.ExecuteClientCommandFromServer($"playvol {sound} {settings.SoundVolume.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+            else if (p.PlayerPawn.Value is { IsValid: true } pawn)
+                pawn.EmitSound(sound, p, settings.SoundVolume, 1f);
+        }
         catch (Exception ex) { Logger.LogDebug(ex, "ZarayskMenu sound failed: {Sound}", sound); }
     }
     public IDisposable Register(MenuDefinition menu, Action<CCSPlayerController, string> selected)
