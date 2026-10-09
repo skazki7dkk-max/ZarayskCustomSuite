@@ -1,0 +1,32 @@
+ЗАРАЙСК — КАСТОМНОЕ МЕНЮ / VIP / КОСМЕТИКА 2.3.4
+
+Состав:
+- ZarayskMenu — Panorama-меню W/S/E/R/F и мышь; правая колонка клавиш сдвинута на 20 px левее, рамки и RGB-свечение клавиш больше не обрезаются, зелёные буквы и логотип сохранены;
+- ZarayskVipSystem 2.3.0 — VIP и компактный накопительный HUD урона;
+- ZarayskCosmetics 1.3.0 — оружие, шляпы, рюкзаки, ауры и Dota-питомцы;
+- Workshop VPK 3809867620 со всеми переданными скомпилированными ассетами.
+
+Установка сервера:
+1. Остановите сервер и сохраните свои конфиги/базы.
+2. Скопируйте содержимое server/game/csgo в game/csgo сервера.
+3. Заполните MySQL в configs/plugins/ZarayskVipSystem и ZarayskCosmetics.
+4. ZarayskMenu.Api.dll должна лежать только в addons/counterstrikesharp/shared/ZarayskMenu.Api/.
+5. Установите workshop-package/3809867620_dir.vpk через загрузчик аддонов.
+6. Перезапустите сервер и проверьте css_plugins list.
+
+Команды:
+!menu — главное меню
+!vip — VIP-меню
+!skins — личный инвентарь всей косметики
+!cw — выданное кастомное оружие без VIP
+css_zskin_give <steam64> <model_id> <quantity> <days, 0=навсегда>
+css_zskin_take <steam64> <model_id> <quantity>
+
+VIP-скины задаются массивом CustomSkinIds внутри каждой группы VIP. ID берутся
+из Models файла ZarayskCosmetics.json. Питомцы плавно следуют за игроком; модели
+с flying/_fly автоматически получают высоту и лёгкое парение. Для ручной
+настройки доступны PetFlying, PetFollowSmoothing и PetIdleAnimation.
+
+Проверено 09.10.2026: сборка без предупреждений и ошибок, 17 тестов
+VIP/Cosmetics и 76 тестов меню; локальный listen-сервер загрузил одновременно
+оружие, Dota-питомца, шляпу, рюкзак и ауру.

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>ZarayskVipSystem</RootNamespace>
+    <AssemblyName>ZarayskVipSystem</AssemblyName>
+    <Version>2.3.0</Version>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\lib\LocalJsonStore.cs" Link="LocalJsonStore.cs" />
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.376" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="MySqlConnector" Version="2.4.0" />
+    <Reference Include="ZarayskMenu.Api">
+      <HintPath>..\lib\ZarayskMenu.Api.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,145 @@
+{
+  "RenderMode": "panorama",
+  "Title": "Зарайск | Меню",
+  "Theme": "gold",
+  "Placement": "standard",
+  "PageSize": 7,
+  "TimeoutSeconds": 45,
+  "ClickCooldownMs": 180,
+  "CaptureMouse": false,
+  "KeyboardNavigationEnabled": true,
+  "ExitHoldSeconds": 2.0,
+  "RebuildOnConnect": true,
+  "Menus": [
+    {
+      "Id": "main",
+      "Title": "Главное меню",
+      "Items": [
+        {
+          "Submenu": "skins",
+          "Text": "Скины и аксессуары",
+          "Id": "skins"
+        },
+        {
+          "Id": "warcraft",
+          "Text": "Warcraft RPG",
+          "Submenu": "warcraft"
+        },
+        {
+          "Id": "helpwar",
+          "Text": "Помощь по навыкам",
+          "Submenu": "warcraft_help"
+        },
+        {
+          "Id": "admin",
+          "Text": "Админ-панель",
+          "Permission": "@zaraysk/menu",
+          "PlayerCommand": "css_admin"
+        },
+        {
+          "Id": "vip",
+          "Text": "VIP-возможности",
+          "PlayerCommand": "css_vip"
+        },
+        {
+          "Id": "help",
+          "Text": "Управление меню",
+          "Submenu": "help"
+        },
+        {
+          "Id": "about",
+          "Text": "О сервере",
+          "Message": "Зарайск | Добро пожаловать на сервер!"
+        }
+      ]
+    },
+    {
+      "Id": "help",
+      "Title": "Управление",
+      "Items": [
+        {
+          "Id": "mouse",
+          "Text": "Мышь — выбрать пункт",
+          "Message": "Наведите курсор на пункт меню и нажмите ЛКМ."
+        },
+        {
+          "Id": "digits",
+          "Text": "Цифры — с клиентским CFG",
+          "Message": "Для цифр установите zaraysk_keys.cfg. 8 — назад, 9 — далее, 0 — выход."
+        },
+        {
+          "Id": "keyboard",
+          "Text": "W/S/E/R/F — управление",
+          "Message": "W/S — выбор пункта, E — открыть, R — назад, удерживать F — закрыть меню."
+        },
+        {
+          "Id": "open",
+          "Text": "Открыть: !menu",
+          "Message": "!menu — главное меню; повтор в главном меню закрывает его. !helpwar — справка Warcraft."
+        }
+      ]
+    },
+    {
+      "Title": "Скины и аксессуары",
+      "Items": [
+        {
+          "Text": "Моя кастомная косметика",
+          "Id": "skins",
+          "PlayerCommand": "css_skins"
+        },
+        {
+          "Text": "Ножи",
+          "PlayerCommand": "css_knife",
+          "Id": "knives"
+        },
+        {
+          "Text": "Перчатки",
+          "Id": "gloves",
+          "Message": "Скины вы можете настроить на нашем сайте cszaraysk.net/skins",
+          "CloseOnSelect": false
+        },
+        {
+          "Text": "Агенты",
+          "Id": "agents",
+          "Message": "Скины вы можете настроить на нашем сайте cszaraysk.net/skins",
+          "CloseOnSelect": false
+        },
+        {
+          "Text": "Музыкальные наборы",
+          "Id": "music",
+          "Message": "Скины вы можете настроить на нашем сайте cszaraysk.net/skins",
+          "CloseOnSelect": false
+        },
+        {
+          "Text": "Значки",
+          "Id": "pins",
+          "Message": "Скины вы можете настроить на нашем сайте cszaraysk.net/skins",
+          "CloseOnSelect": false
+        },
+        {
+          "Text": "Наклейки",
+          "Id": "stickers",
+          "Message": "Скины вы можете настроить на нашем сайте cszaraysk.net/skins",
+          "CloseOnSelect": false
+        },
+        {
+          "Text": "Питомцы",
+          "PlayerCommand": "css_pet",
+          "Id": "pets"
+        }
+      ],
+      "Id": "skins"
+    }
+  ],
+  "PriorityEnabled": true,
+  "SuppressOtherHudInput": true,
+  "MoveSound": "sounds/ui/panorama/itemtile_plastic_rollover_15.vsnd",
+  "SelectSound": "sounds/ui/panorama/itemtile_click_02.vsnd",
+  "BackSound": "sounds/ui/panorama/inventory_item_close_01.vsnd",
+  "ExitSound": "sounds/ui/panorama/mainmenu_press_quit_02.vsnd",
+  "SoundVolume": 0.45,
+  "RequiredPlugins": {
+    "main.warcraft": "WarcraftPlugin",
+    "main.helpwar": "WarcraftPlugin"
+  }
+}

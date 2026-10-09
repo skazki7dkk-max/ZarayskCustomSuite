@@ -1,0 +1,15 @@
+{
+  "Left": 12,
+  "Top": 310,
+  "Width": 300,
+  "RadarRight": 260,
+  "ExtraRight": 57,
+  "RadarBottom": 300,
+  "ChatTop": 790,
+  "RowHeight": 29,
+  "FontSize": 18,
+  "Background": "#171a1ed9",
+  "Accent": "#a85ce8",
+  "NumberColor": "#53b9ef",
+  "ItemColor": "#7eff34"
+}

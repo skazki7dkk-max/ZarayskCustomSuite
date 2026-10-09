@@ -1,0 +1,29 @@
+{
+  "Database": { "Host": "127.0.0.1", "Port": 3306, "Database": "cs2_admin", "User": "cs2", "Password": "change_me", "TablePrefix": "zaraysk_", "Ssl": false },
+  "Settings": {
+    "ChatPrefix": "{green}[Zaraysk VIP]{default}", "AdminPermission": "@css/root", "MaxMoney": 65000, "BonusStartRound": 2,
+    "FovChoices": [90, 95, 100, 105, 110, 115, 120],
+    "BhopSpeedChoices": [250, 275, 300, 325, 350, 400, 450, 500],
+    "ColorChoices": ["white", "red", "orange", "yellow", "lime", "green", "cyan", "blue", "purple", "pink"],
+    "AuraEffects": { "off": "", "circle": "particles/ui/ui_player_ping.vpcf" },
+    "GrenadeTrailParticle": "particles/ui/ui_player_ping.vpcf",
+    "DamageHudSeconds": 3
+  },
+  "Groups": {
+    "VIP": {
+      "DisplayName": "VIP", "ScoreboardTag": "[VIP]", "Health": 110, "Armor": 100, "Helmet": true, "RoundMoney": 1000,
+      "Speed": 1.05, "Gravity": 0.95, "AntiFlash": true, "BunnyHop": true, "BhopMaxSpeedLimit": 400, "DefuseKit": true, "NoFallDamage": true,
+      "DamageHud": true, "HealthshotsEveryRounds": 3, "HealthshotCount": 1, "RgbModel": false, "RgbSmoke": false,
+      "KillScreen": true, "CustomKillFeed": true, "Fov": true, "Auras": true, "GrenadeTrails": true,
+      "CustomSkinIds": ["weapon_070_butterfly_midas", "weapon_071_karambit_claw_d"]
+    },
+    "PREMIUM": {
+      "DisplayName": "PREMIUM", "ScoreboardTag": "[PREMIUM]", "Health": 120, "Armor": 120, "Helmet": true, "RoundMoney": 2000,
+      "Speed": 1.1, "Gravity": 0.9, "AntiFlash": true, "BunnyHop": true, "BhopMaxSpeedLimit": 500, "DefuseKit": true, "NoFallDamage": true,
+      "DamageHud": true, "HealthshotsEveryRounds": 3, "HealthshotCount": 2, "RgbModel": true, "RgbSmoke": true,
+      "KillScreen": true, "CustomKillFeed": true, "Fov": true, "Auras": true, "GrenadeTrails": true,
+      "CustomSkinIds": ["weapon_070_butterfly_midas", "weapon_071_karambit_claw_d", "weapon_072_karambit_gold_d"]
+    }
+  },
+  "ConfigVersion": 1
+}

@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../src/ZarayskMenu/ZarayskMenu.csproj" /><PackageReference Include="CounterStrikeSharp.API" Version="1.0.375" /><Compile Include="../src/ZarayskMenu/ExternalMenus.cs" Link="ExternalMenus.cs" /></ItemGroup>
+  <ItemGroup><ProjectReference Include="../src/ZarayskWarcraftMenu/ZarayskWarcraftMenu.csproj" /></ItemGroup>
+  <ItemGroup><Compile Include="../src/ZarayskMenu/HtmlMenuRenderer.cs" Link="HtmlMenuRenderer.cs" /></ItemGroup>
+</Project>

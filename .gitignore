@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/*.pdb
+**/*-local.json
+ZarayskMenu/server/
+ZarayskMenu/artifacts/
+ZarayskMenu/stage/
+*.zip
+*.vpk

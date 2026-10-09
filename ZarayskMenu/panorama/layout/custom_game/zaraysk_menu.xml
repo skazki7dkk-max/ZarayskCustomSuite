@@ -1,0 +1,39 @@
+<root>
+  <styles><include src="s2r://panorama/styles/custom_game/zaraysk_menu.vcss_c" /></styles>
+  <Panel class="screen" hittest="false">
+    <Panel id="window" class="window" hittest="true">
+      <Panel class="accent" />
+      <Panel class="body">
+        <Panel class="brand" hittest="false">
+          <Image class="brand-lockup" src="file://{images}/custom_game/zaraysk_brand.png" hittest="false" />
+        </Panel>
+        <Panel class="heading"><Label id="subtitle" class="subtitle" text="{s:text}" /><Label id="page" class="page" text="{s:text}" /></Panel>
+        <Panel class="rows">
+          <Button id="key_1" class="row"><Label class="number" text="1." hittest="false" /><Label id="text_1" class="item" text="{s:text}" hittest="false" /></Button>
+          <Button id="key_2" class="row"><Label class="number" text="2." hittest="false" /><Label id="text_2" class="item" text="{s:text}" hittest="false" /></Button>
+          <Button id="key_3" class="row"><Label class="number" text="3." hittest="false" /><Label id="text_3" class="item" text="{s:text}" hittest="false" /></Button>
+          <Button id="key_4" class="row"><Label class="number" text="4." hittest="false" /><Label id="text_4" class="item" text="{s:text}" hittest="false" /></Button>
+          <Button id="key_5" class="row"><Label class="number" text="5." hittest="false" /><Label id="text_5" class="item" text="{s:text}" hittest="false" /></Button>
+          <Button id="key_6" class="row"><Label class="number" text="6." hittest="false" /><Label id="text_6" class="item" text="{s:text}" hittest="false" /></Button>
+          <Button id="key_7" class="row"><Label class="number" text="7." hittest="false" /><Label id="text_7" class="item" text="{s:text}" hittest="false" /></Button>
+        </Panel>
+        <Panel class="controls">
+          <Panel class="control-row">
+            <Panel id="hint_up" class="control-hint"><Panel class="keycap combo-key"><Label class="keycap-label" text="W" /></Panel><Label class="control-text" text="Вверх" /></Panel>
+            <Panel id="hint_down" class="control-hint"><Panel class="keycap combo-key"><Label class="keycap-label" text="S" /></Panel><Label class="control-text" text="Вниз" /></Panel>
+          </Panel>
+          <Panel class="control-row">
+            <Panel id="hint_select" class="control-hint"><Panel class="keycap"><Label class="keycap-label" text="E" /></Panel><Label class="control-text" text="Выбрать" /></Panel>
+            <Button id="key_8" class="control-hint"><Panel id="hint_back" class="keycap" hittest="false"><Label class="keycap-label" text="R" hittest="false" /></Panel><Label class="control-text" text="Назад" hittest="false" /></Button>
+          </Panel>
+          <Panel class="control-row">
+            <Button id="key_0" class="control-hint"><Panel id="hint_exit" class="keycap" hittest="false"><Label class="keycap-label" text="F" hittest="false" /></Panel><Label class="control-text" text="Выход" hittest="false" /></Button>
+          </Panel>
+          <Panel class="control-row mouse-row">
+            <Button id="mouse_toggle" class="control-hint mouse-hint"><Panel id="hint_mouse" class="keycap mouse-key" hittest="false"><Label class="keycap-label" text="MOUSE4" hittest="false" /></Panel><Label class="control-text" text="Управление мышью" hittest="false" /></Button>
+          </Panel>
+        </Panel>
+      </Panel>
+    </Panel>
+  </Panel>
+</root>
