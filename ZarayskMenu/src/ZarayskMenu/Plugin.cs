@@ -17,7 +17,7 @@ namespace ZarayskMenu;
 public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuService
 {
     public override string ModuleName => "ZarayskMenu";
-    public override string ModuleVersion => "0.7.3";
+    public override string ModuleVersion => "0.7.5";
     public override string ModuleAuthor => "Zaraysk";
     public override string ModuleDescription => "Panorama menu and C#/Metamod command integration";
     const string Layout = "panorama/layout/custom_game/zaraysk_menu.vxml_c";
@@ -115,6 +115,13 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
             c.ReplyToCommand($"ZarayskMenu {ModuleVersion} loaded; HTML HUD test sent; mode={settings.RenderMode}.");
         });
         AddCommand("css_zmenu_mouse", "Toggle ZarayskMenu mouse control", (p, c) => { if (Human(p) && sessions.ContainsKey(p!.Slot)) ToggleMouse(p); });
+        AddCommand("css_zmenu_mode", "Set menu controls: keyboard or mouse", (p, c) =>
+        {
+            if (!Human(p) || !sessions.ContainsKey(p!.Slot)) return;
+            if (c.ArgCount != 2 || c.GetArg(1) is not ("keyboard" or "mouse"))
+            { c.ReplyToCommand("css_zmenu_mode keyboard | mouse"); return; }
+            SetMouseMode(p, c.GetArg(1) == "mouse");
+        });
         for (int i = 0; i <= 9; i++)
         {
             int key = i;
@@ -211,7 +218,7 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
         {
             Close(p);
             ready = true; EnsureHud();
-            var session = new Session(menuId) { MouseMode = mousePreferences.GetValueOrDefault(p.Slot) }; sessions[p.Slot] = session;
+            var session = new Session(menuId) { MouseMode = mousePreferences.GetValueOrDefault(p.Slot, settings.CaptureMouse) }; sessions[p.Slot] = session;
             Draw(p);
             PlayMenuSound(p, settings.OpenSound);
             // The client may not have constructed the replicated panel on the first frame.
@@ -251,8 +258,7 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
         var capture = MouseCapture(p);
         if (hud.IsInputCaptureEnabled(p) != capture) hud.SetInputCaptureEnabled(p, capture);
     }
-    bool MouseCapture(CCSPlayerController p) => sessions.TryGetValue(p.Slot, out var s) && s.MouseMode
-        || settings.CaptureMouse && !settings.KeyboardNavigationEnabled;
+    bool MouseCapture(CCSPlayerController p) => sessions.TryGetValue(p.Slot, out var s) && s.MouseMode;
     public void Close(CCSPlayerController p) { sessions.Remove(p.Slot); ReleaseExternal(p.Slot); Hide(p); }
     void CloseWithSound(CCSPlayerController p) { PlayMenuSound(p, settings.ExitSound); Close(p); }
     void Hide(CCSPlayerController p)
@@ -272,9 +278,12 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
         if (!settings.KeyboardNavigationEnabled || !Human(p) || !sessions.TryGetValue(p.Slot, out var s)) return;
         if ((released & PlayerButtons.Inspect) != 0) { s.ExitHoldStarted = -1; KeyState(p, "hint_exit", false); }
         if ((pressed & PlayerButtons.Inspect) != 0) { s.ExitHoldStarted = Now; KeyState(p, "hint_exit", true); }
-        if ((pressed & PlayerButtons.Forward) != 0) { Pulse(p, "hint_up"); MoveCursor(p, -1); }
-        else if ((pressed & PlayerButtons.Back) != 0) { Pulse(p, "hint_down"); MoveCursor(p, 1); }
-        if ((pressed & PlayerButtons.Use) != 0) { Pulse(p, "hint_select"); ActivateCursor(p); }
+        if (!s.MouseMode)
+        {
+            if ((pressed & PlayerButtons.Forward) != 0) { Pulse(p, "hint_up"); MoveCursor(p, -1); }
+            else if ((pressed & PlayerButtons.Back) != 0) { Pulse(p, "hint_down"); MoveCursor(p, 1); }
+            if ((pressed & PlayerButtons.Use) != 0) { Pulse(p, "hint_select"); ActivateCursor(p); }
+        }
         if ((pressed & PlayerButtons.Reload) != 0)
         {
             Pulse(p, "hint_back");
@@ -284,16 +293,20 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
     }
     void ToggleMouse(CCSPlayerController p)
     {
-        if (HtmlMode) { p.PrintToChat("Зарайск | HTML-меню: W/S — выбор, E — открыть, R — назад, удержание F — закрыть."); return; }
         if (!sessions.TryGetValue(p.Slot, out var s) || Now - s.LastMouseToggle < 0.3) return;
         s.LastMouseToggle = Now;
-        s.MouseMode = !s.MouseMode;
+        SetMouseMode(p, !s.MouseMode);
+    }
+    void SetMouseMode(CCSPlayerController p, bool mouse)
+    {
+        if (!sessions.TryGetValue(p.Slot, out var s)) return;
+        if (HtmlMode && mouse) { p.PrintToChat("Зарайск | Управление мышью доступно в Panorama-меню."); return; }
+        s.MouseMode = mouse;
+        s.ExitHoldStarted = -1;
         mousePreferences[p.Slot] = s.MouseMode;
-        s.Expires = Now + settings.TimeoutSeconds;
         PlayMenuSound(p, s.MouseMode ? settings.SelectSound : settings.BackSound);
-        Class(p, "hint_mouse", "enabled", s.MouseMode);
-        Pulse(p, "hint_mouse");
-        if (hud is { IsValid: true }) hud.SetInputCaptureEnabled(p, MouseCapture(p));
+        Draw(p);
+        p.PrintToChat(mouse ? "Зарайск | Управление мышью: наведите курсор и нажмите ЛКМ." : "Зарайск | Управление клавишами: W/S, E — выбрать, R — назад, удержание F — выход.");
     }
     void KeyState(CCSPlayerController p, string id, bool pressed)
     {
@@ -358,11 +371,13 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
         for (int n = 1; n <= 7; n++)
         {
             var index = s.Page * settings.PageSize + n - 1; var item = n <= settings.PageSize && index < items.Count ? items[index] : null;
-            Text(p, $"text_{n}", item?.Text ?? ""); Class(p, $"key_{n}", "empty", item == null);
+            var label = item?.Text ?? "";
+            if (item?.PlayerCommand == (s.MouseMode ? "css_zmenu_mode mouse" : "css_zmenu_mode keyboard")) label += " ✓";
+            Text(p, $"text_{n}", label); Class(p, $"key_{n}", "empty", item == null);
             Class(p, $"key_{n}", "selected", item != null && index == s.Cursor);
             Class(p, $"key_{n}", "disabled", item == null || !item.Enabled || (item.Submenu.Length > 0 && (!menus.TryGetValue(item.Submenu, out var child) || !Allowed(p, child.Menu.Permission))));
         }
-        Class(p, "hint_mouse", "enabled", s.MouseMode);
+        Text(p, "control_mode", s.MouseMode ? "Мышь · ЛКМ" : "Клавиши");
         Class(p, "window", "shown", true); hud!.SetInputCaptureEnabled(p, MouseCapture(p));
         ApplyPriority(p);
     }
@@ -391,6 +406,10 @@ public sealed partial class Plugin : BasePlugin, IMenuService, IExternalMenuServ
         s.Cursor = index;
         var item = items[index]; if (!item.Enabled || !Allowed(p, item.Permission)) { Draw(p); return; }
         PlayMenuSound(p, settings.SelectSound);
+        // Handle built-in controls directly: retain this session and back stack,
+        // without depending on a client executing a server-origin console command.
+        if (item.PlayerCommand is "css_zmenu_mode mouse" or "css_zmenu_mode keyboard")
+        { SetMouseMode(p, item.PlayerCommand == "css_zmenu_mode mouse"); return; }
         if (item.Submenu.Length > 0)
         {
             if (!menus.TryGetValue(item.Submenu, out var child) || !Allowed(p, child.Menu.Permission) || s.Back.Count >= 16) return;

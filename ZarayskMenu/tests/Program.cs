@@ -16,6 +16,8 @@ Check(!escapedPage.Contains("<script>") && !escapedPage.Contains("<font color='r
 Check(HtmlMenuRenderer.Render("Title", "Menu", [], 0, 0, 7).Contains("Нет доступных пунктов"), "empty HTML menu remains visible");
 config.Validate(); Check(config.Title == "Зарайск | Меню", "default config/title");
 var mainItems = config.Menus.Single(menu => menu.Id == "main").Items;
+var controlItems = config.Menus.Single(menu => menu.Id == "help").Items;
+Check(mainItems.Single(item => item.Id == "help").Submenu == "help" && controlItems.Count == 2 && controlItems.All(item => !item.CloseOnSelect) && controlItems.Select(item => item.PlayerCommand).Order().SequenceEqual(new[] { "css_zmenu_mode keyboard", "css_zmenu_mode mouse" }), "control submenu offers explicit keyboard and mouse choices without closing the session");
 Check(mainItems.Single(item => item.Id == "vip").PlayerCommand == "css_vip", "VIP routes to plugin instead of missing submenu");
 Check(mainItems.All(item => item.Id is not ("knives" or "rules")), "main menu omits knives and rules");
 Check(config.RequiredPlugins["main.warcraft"] == "WarcraftPlugin", "Warcraft item requires WarcraftPlugin");
@@ -43,11 +45,13 @@ config.Menus.Add(new() { Id="main" }); Reject(config.Validate, "duplicate menus"
 var xml = XDocument.Load(Path.Combine(root,"panorama/layout/custom_game/zaraysk_menu.xml"));
 var ids = xml.Descendants().Attributes("id").Select(a => a.Value).ToArray();
 Check(ids.Length == ids.Distinct().Count(), "unique Panorama panel ids");
-Check(Enumerable.Range(1,7).All(n=>ids.Contains("key_"+n)) && !ids.Contains("key_9") && xml.Descendants().Where(e => (string?)e.Attribute("id") is "key_8" or "key_0").All(e => (string?)e.Attribute("class") == "control-hint"), "back and exit stay in existing key hints, not additional rows");
-Check(new[]{"hint_up","hint_down","hint_select","hint_back","hint_exit","hint_mouse"}.All(ids.Contains), "keyboard, back and mouse hints exist");
+Check(Enumerable.Range(1,7).All(n=>ids.Contains("key_"+n)) && !ids.Contains("key_9") && xml.Descendants().Where(e => (string?)e.Attribute("id") is "key_8" or "key_0").All(e => ((string?)e.Attribute("class") ?? "").Split(' ').Contains("control-hint")), "back and exit stay in existing key hints, not additional rows");
+Check(new[]{"hint_up","hint_down","hint_select","hint_back","hint_exit","control_mode"}.All(ids.Contains), "keyboard, back and current control mode hints exist");
 Check(xml.Root!.Element("Panel")!.Attribute("id") == null, "root has no forbidden id");
 Check(xml.Descendants().All(e=>new[]{"root","styles","include","Panel","Label","Button","Image"}.Contains(e.Name.LocalName)), "allowed panel types only");
 Check(File.ReadAllText(Path.Combine(root, "panorama/styles/custom_game/zaraysk_menu.css")).Contains("@keyframes 'zaraysk_rgb'"), "runtime CSS keyframe name is quoted");
+Check(!System.Text.RegularExpressions.Regex.IsMatch(File.ReadAllText(Path.Combine(root, "panorama/styles/custom_game/zaraysk_menu.css")), @"(?m)^[^{}]*[+~][^{}]*\{"), "Panorama selectors avoid unsupported sibling combinators that hide the entire HUD");
+Check(xml.Descendants().Where(e => (string?)e.Attribute("id") is "hint_down" or "key_8").All(e => ((string?)e.Attribute("class") ?? "").Split(' ').Contains("second-column")), "second control column keeps its offset with an explicit supported class");
 Check(xml.Descendants().Where(e => e.Name.LocalName is "Panel" or "Label" or "Button" or "Image").Attributes().All(a => new[]{"id","class","hittest","text","src","texturewidth","textureheight"}.Contains(a.Name.LocalName)), "Custom HUD attribute whitelist prevents client rejection");
 Check(File.ReadAllText(Path.Combine(root, "src/ZarayskMenu/Plugin.cs")).Contains("const string Layout = \"panorama/layout/custom_game/zaraysk_menu.vxml_c\""), "dynamic HUD references compiled layout resource");
 Check(xml.Descendants("Image").All(e=>e.Attribute("src")?.Value=="file://{images}/custom_game/zaraysk_brand.png"), "fixed title and logo use original bundled branding");

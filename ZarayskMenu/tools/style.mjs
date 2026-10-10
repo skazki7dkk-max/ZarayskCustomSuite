@@ -6,8 +6,8 @@ const c = JSON.parse(fs.readFileSync(path.join(root,'config/layout.json'),'utf8'
 for (const k of ['Left','Top','Width','RadarRight','ExtraRight','RadarBottom','ChatTop','RowHeight','FontSize'])
   if (!Number.isFinite(c[k]) || c[k] < 0 || c[k] > 2000) throw Error(`Invalid ${k}`);
 for (const k of ['Background','Accent','NumberColor','ItemColor']) if (!/^#[a-fA-F0-9]{6}([a-fA-F0-9]{2})?$/.test(c[k])) throw Error(`Invalid ${k}`);
-// Full seven-item page: title, subtitle, padding, ten rows and footer spacing.
-const height = 2 + 24 + 29 + 29 + c.RowHeight * 10 + 12 + 1 + 6 + 2;
+// Full seven-item page and three compact control rows, including padding/borders.
+const height = 2 + 24 + 31 + 29 + c.RowHeight * 7 + 7 + 1 + 7 + 30 * 3 + 2;
 if(c.Width < 220 || c.RowHeight < 22 || c.FontSize < 12 || c.FontSize > c.RowHeight-4 || c.Left+c.Width > c.RadarRight+c.ExtraRight || c.Top < c.RadarBottom || c.Top+height > c.ChatTop)
   throw Error(`Menu outside configured radar/chat bounds (bottom=${c.Top+height}). Adjust layout.json.`);
 const file=path.join(root,'panorama/styles/custom_game/zaraysk_menu.css');

@@ -20,17 +20,15 @@
         <Panel class="controls">
           <Panel class="control-row">
             <Panel id="hint_up" class="control-hint"><Panel class="keycap combo-key"><Label class="keycap-label" text="W" /></Panel><Label class="control-text" text="Вверх" /></Panel>
-            <Panel id="hint_down" class="control-hint"><Panel class="keycap combo-key"><Label class="keycap-label" text="S" /></Panel><Label class="control-text" text="Вниз" /></Panel>
+            <Panel id="hint_down" class="control-hint second-column"><Panel class="keycap combo-key"><Label class="keycap-label" text="S" /></Panel><Label class="control-text" text="Вниз" /></Panel>
           </Panel>
           <Panel class="control-row">
             <Panel id="hint_select" class="control-hint"><Panel class="keycap"><Label class="keycap-label" text="E" /></Panel><Label class="control-text" text="Выбрать" /></Panel>
-            <Button id="key_8" class="control-hint"><Panel id="hint_back" class="keycap" hittest="false"><Label class="keycap-label" text="R" hittest="false" /></Panel><Label class="control-text" text="Назад" hittest="false" /></Button>
+            <Button id="key_8" class="control-hint second-column"><Panel id="hint_back" class="keycap" hittest="false"><Label class="keycap-label" text="R" hittest="false" /></Panel><Label class="control-text" text="Назад" hittest="false" /></Button>
           </Panel>
           <Panel class="control-row">
             <Button id="key_0" class="control-hint"><Panel id="hint_exit" class="keycap" hittest="false"><Label class="keycap-label" text="F" hittest="false" /></Panel><Label class="control-text" text="Выход" hittest="false" /></Button>
-          </Panel>
-          <Panel class="control-row mouse-row">
-            <Button id="mouse_toggle" class="control-hint mouse-hint"><Panel id="hint_mouse" class="keycap mouse-key" hittest="false"><Label class="keycap-label" text="MOUSE4" hittest="false" /></Panel><Label class="control-text" text="Управление мышью" hittest="false" /></Button>
+            <Panel class="control-hint second-column" hittest="false"><Label id="control_mode" class="control-text mode-text" text="{s:text}" hittest="false" /></Panel>
           </Panel>
         </Panel>
       </Panel>

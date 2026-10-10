@@ -55,27 +55,19 @@
     },
     {
       "Id": "help",
-      "Title": "Управление",
+      "Title": "Управление меню",
       "Items": [
         {
-          "Id": "mouse",
-          "Text": "Мышь — выбрать пункт",
-          "Message": "Наведите курсор на пункт меню и нажмите ЛКМ."
-        },
-        {
-          "Id": "digits",
-          "Text": "Цифры — с клиентским CFG",
-          "Message": "Для цифр установите zaraysk_keys.cfg. 8 — назад, 9 — далее, 0 — выход."
-        },
-        {
           "Id": "keyboard",
-          "Text": "W/S/E/R/F — управление",
-          "Message": "W/S — выбор пункта, E — открыть, R — назад, удерживать F — закрыть меню."
+          "Text": "Управление клавишами",
+          "PlayerCommand": "css_zmenu_mode keyboard",
+          "CloseOnSelect": false
         },
         {
-          "Id": "open",
-          "Text": "Открыть: !menu",
-          "Message": "!menu — главное меню; повтор в главном меню закрывает его. !helpwar — справка Warcraft."
+          "Id": "mouse",
+          "Text": "Управление мышью",
+          "PlayerCommand": "css_zmenu_mode mouse",
+          "CloseOnSelect": false
         }
       ]
     },
